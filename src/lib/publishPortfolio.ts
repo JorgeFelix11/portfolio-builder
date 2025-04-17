@@ -1,11 +1,29 @@
 import { db } from "./firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { Portfolio } from "../types/Portfolio";
+import { User } from "firebase/auth";
 
 /**
- * Publica un portafolio en Firestore y devuelve el ID
+ * Publica o actualiza un portafolio
+ * @param portfolio Datos del portafolio
+ * @param user Usuario actual
+ * @param id (opcional) ID del portafolio (para actualizar)
  */
-export const publishPortfolio = async (portfolio: Portfolio) => {
-  const docRef = await addDoc(collection(db, "portfolios"), portfolio);
-  return docRef.id; // ← úsalo para crear el link público
+export const publishPortfolio = async (
+  portfolio: Portfolio,
+  user: User,
+  id?: string
+): Promise<string> => {
+  if (id) {
+    const ref = doc(db, "portfolios", id);
+    await updateDoc(ref, { ...portfolio, updatedAt: new Date() });
+    return id;
+  } else {
+    const ref = await addDoc(collection(db, "portfolios"), {
+      ...portfolio,
+      userId: user.uid,
+      createdAt: new Date(),
+    });
+    return ref.id;
+  }
 };
