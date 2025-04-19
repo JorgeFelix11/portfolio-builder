@@ -166,6 +166,53 @@ const Form = ({ data, onChange }: Props) => {
                     >↓</button>
                   </div>
 
+                  <div className="flex gap-4 flex-wrap">
+                    <label className="text-sm">
+                      BG Color:
+                      <input
+                        type="color"
+                        value={section.bgColor || "#ffffff"}
+                        onChange={(e) => {
+                          const updated = [...data.sections];
+                          updated[sectionIndex].bgColor = e.target.value;
+                          onChange({ ...data, sections: updated });
+                        }}
+                        className="ml-2"
+                      />
+                    </label>
+
+                    <label className="text-sm">
+                      Text Color:
+                      <input
+                        type="color"
+                        value={section.textColor || "#000000"}
+                        onChange={(e) => {
+                          const updated = [...data.sections];
+                          updated[sectionIndex].textColor = e.target.value;
+                          onChange({ ...data, sections: updated });
+                        }}
+                        className="ml-2"
+                      />
+                    </label>
+
+                    <label className="text-sm">
+                      Align:
+                      <select
+                        value={section.textAlign || "left"}
+                        onChange={(e) => {
+                          const updated = [...data.sections];
+                          updated[sectionIndex].textAlign = e.target.value as "left" | "center" | "right";
+                          onChange({ ...data, sections: updated });
+                        }}
+                        className="ml-2 border rounded p-1"
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </label>
+                  </div>
+
                   {/* Render block content */}
                   {block.type === "text" && (
                     <input

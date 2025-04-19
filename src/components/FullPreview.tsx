@@ -7,7 +7,7 @@ const FullPreview = ({ data }: { data: Portfolio }) => {
 
   return (
     <div className="space-y-16 bg-white p-8 shadow rounded">
-      <PortfolioNavbar sections={data.sections} />
+      <PortfolioNavbar sections={data.sections} portfolioName={data.name}/>
       {/* <div className="flex justify-end gap-2 mb-4">
         {["desktop", "tablet", "mobile"].map((size) => (
           <button

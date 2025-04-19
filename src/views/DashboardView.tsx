@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../lib/firebase";
-import { collection, query, where, getDocs, DocumentData } from "firebase/firestore";
+import { collection, query, where, getDocs, DocumentData, deleteDoc, doc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 
@@ -10,6 +10,18 @@ const DashboardView = () => {
   const [portfolios, setPortfolios] = useState<DocumentData[]>([]);
   const navigate = useNavigate();
   const { showLoading, hideLoading, loading } = useLoading();
+
+  const handleDelete = async (id: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this portfolio?");
+    if (!confirmDelete) return;
+  
+    try {
+      await deleteDoc(doc(db, "portfolios", id));
+      setPortfolios((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error("Error deleting portfolio:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchPortfolios = async () => {
@@ -41,7 +53,7 @@ const DashboardView = () => {
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline text-sm"
               >
-                🔗 Public Link
+                Public Link
               </a>
               <button
                 onClick={() => navigate(`/editor?id=${portfolio.id}`)}
@@ -49,6 +61,13 @@ const DashboardView = () => {
               >
                 ✏️ Edit
               </button>
+              <button
+                onClick={() => handleDelete(portfolio.id)}
+                className="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+              >
+                Delete
+              </button>
+
             </div>
           </li>
         ))}
