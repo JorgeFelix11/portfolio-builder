@@ -33,7 +33,6 @@ const DashboardView = () => {
           <li key={portfolio.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
             <div>
               <h2 className="font-semibold">{portfolio.name || "Untitled Portfolio"}</h2>
-              <p className="text-sm text-gray-600">{portfolio.title}</p>
             </div>
             <div className="flex gap-3 items-center">
               <a

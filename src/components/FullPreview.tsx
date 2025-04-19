@@ -1,14 +1,14 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { Portfolio, SectionField } from "../types/Portfolio";
 import PortfolioNavbar from "./PortfolioNavbar";
 
 const FullPreview = ({ data }: { data: Portfolio }) => {
-  const [previewSize, setPreviewSize] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  // const [previewSize, setPreviewSize] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
   return (
     <div className="space-y-16 bg-white p-8 shadow rounded">
       <PortfolioNavbar sections={data.sections} />
-      <div className="flex justify-end gap-2 mb-4">
+      {/* <div className="flex justify-end gap-2 mb-4">
         {["desktop", "tablet", "mobile"].map((size) => (
           <button
             key={size}
@@ -20,18 +20,11 @@ const FullPreview = ({ data }: { data: Portfolio }) => {
             {size}
           </button>
         ))}
-      </div>
+      </div> */}
       {Array.isArray(data.sections) && data.sections.length === 0 ? (
         <p className="text-gray-500 italic">No sections yet. Use the editor to add some!</p>
       ) : (
-        <div
-          className={`mx-auto transition-all duration-300 
-            ${previewSize === "desktop" ? "max-w-5xl" : ""}
-            ${previewSize === "tablet" ? "max-w-2xl scale-[97%]" : ""}
-            ${previewSize === "mobile" ? "max-w-sm scale-[90%]" : ""}
-          `}
-        >
-          {data.sections.map((section) => (
+          data.sections.map((section) => (
             <section
               key={section.anchor || section.label}
               {...(section.anchor ? { id: section.anchor } : {})}
@@ -111,8 +104,7 @@ const FullPreview = ({ data }: { data: Portfolio }) => {
                 return null;
               })}
             </section>
-          ))}
-        </div>
+          ))
       )}
     </div>
   );

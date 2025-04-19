@@ -10,6 +10,15 @@ const Form = ({ data, onChange }: Props) => {
     <div className="space-y-6">
       <fieldset className="space-y-4">
         <legend className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Navbar Items</legend>
+        <input
+          placeholder='Name'
+          type="text"
+          value={data.name}
+          onChange={(e) => {
+            onChange({ ...data, name: e.target.value });
+          }}
+          className="border p-2 rounded w-full"
+        />
         {Array.isArray(data.sections) &&
           data.sections.map((section, sectionIndex) => (
             <div key={sectionIndex} className="border rounded p-4 space-y-2">
@@ -111,7 +120,7 @@ const Form = ({ data, onChange }: Props) => {
                           type: newType,
                           content:
                             newType === "tags" ? [] :
-                            newType === "multi-text" ? [{ label: "", value: "" }] : "",
+                            newType === "multi-text" || newType === "link-list" ? [{ label: "", value: "" }] : "",
                         };
                         const updated = [...data.sections];
                         updated[sectionIndex].blocks = updatedBlocks;
@@ -123,6 +132,9 @@ const Form = ({ data, onChange }: Props) => {
                       <option value="textarea">Textarea</option>
                       <option value="tags">Tags</option>
                       <option value="multi-text">Multi-Text</option>
+                      <option value="image">Image</option>
+                      <option value="link-list">Link list</option>
+                      <option value="quote">Quote</option>
                     </select>
           
                     {/* reorder block buttons */}

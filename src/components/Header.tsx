@@ -17,7 +17,7 @@ const Header = () => {
 
       {user ? (
         <div className="flex items-center gap-4">
-          <Link to="/editor" className="text-sm text-blue-600 hover:underline">
+          <Link to="/" className="text-sm text-blue-600 hover:underline">
             + New
           </Link>
           <Link to="/dashboard" className="text-sm text-blue-600 hover:underline">
