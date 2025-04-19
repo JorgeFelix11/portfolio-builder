@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Form from "../components/Form";
 import FullPreview from "../components/FullPreview";
-import { publishPortfolio } from "../lib/publishPortfolio";
+import { savePortfolioWithSlug } from "../lib/portfolio";
 import { useAuth } from "../context/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
@@ -17,6 +17,7 @@ function EditorView() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const [portfolio, setPortfolio] = useState<Portfolio>({
+    userId: "",
     name: "",
     title: "",
     template: "clean",
@@ -52,7 +53,7 @@ function EditorView() {
   const handlePublish = async () => {
     if (!user) return;
     showLoading();
-    const newId = await publishPortfolio(portfolio, user, id ?? undefined);
+    const newId = await savePortfolioWithSlug(portfolio, user);
     setPublicLink(`${window.location.origin}/p/${newId}`);
     hideLoading();
     notify({

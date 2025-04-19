@@ -37,6 +37,7 @@ export type CustomSection = {
 };
 
 export type Portfolio = {
+  userId: string;
   name: string;
   title: string;
   template?: string;

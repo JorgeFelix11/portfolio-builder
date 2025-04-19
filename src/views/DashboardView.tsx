@@ -36,7 +36,7 @@ const DashboardView = () => {
             </div>
             <div className="flex gap-3 items-center">
               <a
-                href={`/p/${portfolio.id}`}
+                href={`/p/${portfolio.publicId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline text-sm"
