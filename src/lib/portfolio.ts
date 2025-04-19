@@ -4,11 +4,15 @@ import { Portfolio } from "../types/Portfolio";
 import { slugify } from "../utils/slugify";
 import { User } from "firebase/auth";
 
-export const savePortfolioWithSlug = async (portfolio: Portfolio, user: User) => {
+export const savePortfolioWithSlug = async (
+  portfolio: Portfolio,
+  user: User
+): Promise<string> => {
   const base = slugify(user.displayName || user.email?.split("@")[0] || "user");
   let candidate = base;
   let suffix = 1;
 
+  // Asegura que el publicId sea único
   while (true) {
     const q = query(collection(db, "portfolios"), where("publicId", "==", candidate));
     const snapshot = await getDocs(q);
@@ -16,17 +20,17 @@ export const savePortfolioWithSlug = async (portfolio: Portfolio, user: User) =>
     candidate = `${base}-${suffix++}`;
   }
 
+  // Guarda el documento sin campo id, pero con publicId
   await addDoc(collection(db, "portfolios"), {
     ...portfolio,
-    createdAt: new Date(),
+    userId: user.uid,
     publicId: candidate,
-    userId: portfolio.userId,
+    createdAt: new Date(),
   });
 
-  return candidate; // para redirigir a /p/{publicId}
+  return candidate; // esto se puede usar para construir la URL
 };
 
-// Obtener portfolio por publicId en vista pública
 export const getPortfolioByPublicId = async (publicId: string): Promise<Portfolio | null> => {
   const q = query(collection(db, "portfolios"), where("publicId", "==", publicId));
   const snapshot = await getDocs(q);

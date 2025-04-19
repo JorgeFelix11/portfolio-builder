@@ -22,7 +22,7 @@ const Notification = ({ message, type = "info", onClose }: Props) => {
 
   return (
     <div
-      className={`fixed top-6 right-6 text-white px-4 py-2 rounded shadow-lg z-50 ${
+      className={`fixed bottom-6 right-6 text-white px-4 py-2 rounded shadow-lg z-50 ${
         colors[type] || colors.info
       }`}
     >

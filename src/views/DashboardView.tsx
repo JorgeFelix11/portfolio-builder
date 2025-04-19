@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../lib/firebase";
-import { collection, query, where, getDocs, DocumentData, deleteDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
+import { Portfolio } from "../types/Portfolio";
 
 const DashboardView = () => {
   const { user } = useAuth();
-  const [portfolios, setPortfolios] = useState<DocumentData[]>([]);
+  const [portfolios, setPortfolios] = useState<(Portfolio & { id: string })[]>([]);
   const navigate = useNavigate();
   const { showLoading, hideLoading, loading } = useLoading();
 
   const handleDelete = async (id: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this portfolio?");
     if (!confirmDelete) return;
-  
+
     try {
       await deleteDoc(doc(db, "portfolios", id));
       setPortfolios((prev) => prev.filter((p) => p.id !== id));
@@ -30,7 +31,12 @@ const DashboardView = () => {
       showLoading();
       const snapshot = await getDocs(q);
       hideLoading();
-      setPortfolios(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setPortfolios(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as (Portfolio & { id: string })[]
+      );
     };
 
     fetchPortfolios();
@@ -67,7 +73,6 @@ const DashboardView = () => {
               >
                 Delete
               </button>
-
             </div>
           </li>
         ))}

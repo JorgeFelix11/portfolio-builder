@@ -6,6 +6,10 @@ const Header = () => {
   const { user, login, logout } = useAuth();
   const navigate = useNavigate();
 
+  const handleNew = () => {
+    localStorage.removeItem("portfolio-data");
+    navigate("/editor");
+  };
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow mb-4">
       <h1
@@ -17,9 +21,12 @@ const Header = () => {
 
       {user ? (
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-sm text-blue-600 hover:underline">
-            + New
-          </Link>
+          <button
+            onClick={handleNew}
+            className="hover:underline rounded"
+          >
+            ➕ New Portfolio
+          </button>
           <Link to="/dashboard" className="text-sm text-blue-600 hover:underline">
             Dashboard
           </Link>

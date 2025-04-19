@@ -4,14 +4,11 @@ import FullPreview from "../components/FullPreview";
 import { savePortfolioWithSlug } from "../lib/portfolio";
 import { useAuth } from "../context/AuthContext";
 import { useSearchParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Portfolio } from "../types/Portfolio";
 import { useNotification } from "../context/NotificationContext";
 import { useLoading } from "../context/LoadingContext";
-
-
-const STORAGE_KEY = "portfolio-data";
 
 function EditorView() {
   const [searchParams] = useSearchParams();
@@ -36,14 +33,30 @@ function EditorView() {
     const loadPortfolio = async () => {
       if (!id) return;
       showLoading();
-      const ref = doc(db, "portfolios", id);
+    
+      let snapshot = null;
+    
+      // intentar como doc ID
+      const ref = doc(db, "portfolios", "OysOPHuK2JCVymGQf5yz");
       const snap = await getDoc(ref);
+      console.log(id, snap)
       if (snap.exists()) {
-        setPortfolio(snap.data() as Portfolio);
+        snapshot = snap;
+      } else {
+        // fallback: intentar como publicId
+        const q = query(collection(db, "portfolios"), where("publicId", "==", id));
+        const result = await getDocs(q);
+        if (!result.empty) {
+          snapshot = result.docs[0];
+        }
       }
+    
+      if (snapshot) {
+        setPortfolio({ ...snapshot.data(), id: snapshot.id } as Portfolio);
+      }
+    
       hideLoading();
     };
-  
     loadPortfolio();
   }, [id]);
 
@@ -53,28 +66,39 @@ function EditorView() {
   const handlePublish = async () => {
     if (!user) return;
     showLoading();
-    const newId = await savePortfolioWithSlug(portfolio, user);
-    setPublicLink(`${window.location.origin}/p/${newId}`);
-    hideLoading();
-    notify({
-      message: id ? "✅ Portfolio updated!" : "✅ Portfolio published!",
-      type: "success",
-    });
+    try {
+      if (id) {
+        const ref = doc(db, "portfolios", id);
+        await setDoc(ref, { ...portfolio, updatedAt: new Date() });
+        setPublicLink(`${window.location.origin}/p/${portfolio.publicId || id}`);
+        notify({ message: "✅ Portfolio updated!", type: "success" });
+      } else {
+        const newId = await savePortfolioWithSlug(portfolio, user);
+        setPortfolio((prev) => ({ ...prev, publicId: newId }));
+        setPublicLink(`${window.location.origin}/p/${newId}`);
+        notify({ message: "✅ Portfolio published!", type: "success" });
+      }
+    } catch (error) {
+      console.error("Error saving portfolio:", error);
+      notify({ message: "❌ Failed to save portfolio.", type: "error" });
+    } finally {
+      hideLoading();
+    }
   };
-
-  // Cargar desde localStorage al iniciar
+  
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    if (id) return;
+    const saved = localStorage.getItem("portfolio-data");
     if (saved) {
       setPortfolio(JSON.parse(saved));
     }
-  }, []);
-
-  // Guardar en localStorage cada vez que cambia
+  }, [id]);
+  
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(portfolio));
+    localStorage.setItem("portfolio-data", JSON.stringify(portfolio));
   }, [portfolio]);
   
+
   return (
     <div className="min-h-screen p-8 bg-gray-100">
       <div className="grid md:grid-cols-2 gap-8">
