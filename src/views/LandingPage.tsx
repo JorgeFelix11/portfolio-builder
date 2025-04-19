@@ -1,10 +1,15 @@
 import { useAuth } from "../context/AuthContext";
+import { useNotification } from "../context/NotificationContext";
 
 const LandingPage = () => {
   const { login } = useAuth();
-
+const { notify } = useNotification()
   const handleLogin = async () => {
     await login();
+    notify({
+      message: "Welcome back!",
+      type: "success",
+    });
   };
 
   return (

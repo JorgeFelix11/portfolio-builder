@@ -1,98 +1,118 @@
-import { Portfolio } from "../types/Portfolio";
+import { ReactNode, useState } from "react";
+import { Portfolio, SectionField } from "../types/Portfolio";
+import PortfolioNavbar from "./PortfolioNavbar";
 
 const FullPreview = ({ data }: { data: Portfolio }) => {
-  const template = data.template || "clean";
+  const [previewSize, setPreviewSize] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-  const textClass =
-  template === "bold"
-    ? "text-yellow-800"
-    : template === "minimal"
-    ? "text-gray-600"
-    : template === "classic"
-    ? "text-gray-900 font-serif"
-    : template === "terminal"
-    ? "text-green-500 font-mono"
-    : template === "modern"
-    ? "text-indigo-700"
-    : template === "soft"
-    ? "text-pink-700"
-    : "text-gray-800";
-
-const headingClass =
-  template === "bold"
-    ? "text-4xl font-extrabold text-blue-800"
-    : template === "classic"
-    ? "text-4xl font-semibold font-serif"
-    : template === "terminal"
-    ? "text-3xl font-bold font-mono"
-    : template === "modern"
-    ? "text-5xl font-bold text-indigo-700"
-    : template === "soft"
-    ? "text-3xl font-medium text-pink-700"
-    : template === "minimal"
-    ? "text-3xl font-light text-gray-700"
-    : "text-4xl font-bold text-gray-900";
-
-const tagClass =
-  template === "bold"
-    ? "bg-yellow-100 text-yellow-800"
-    : template === "classic"
-    ? "bg-gray-200 text-gray-800 font-serif"
-    : template === "terminal"
-    ? "bg-black text-green-500 font-mono border border-green-500"
-    : template === "modern"
-    ? "bg-indigo-100 text-indigo-700"
-    : template === "soft"
-    ? "bg-pink-100 text-pink-700"
-    : template === "minimal"
-    ? "bg-gray-200 text-gray-700"
-    : "bg-gray-100 text-gray-800";
-    
   return (
     <div className="space-y-16 bg-white p-8 shadow rounded">
-      <section>
-        <h1 className={headingClass}>{data.name}</h1>
-        <h2 className="text-xl text-gray-500">{data.title}</h2>
-        <p className={`mt-4 ${textClass}`}>{data.about}</p>
-      </section>
-
-      {data.technologies.length > 0 && (
-        <section>
-          <h3 className="text-2xl font-semibold mb-2">Technologies</h3>
-          <ul className="flex flex-wrap gap-2">
-            {data.technologies.map((tech) => (
-              <li key={tech} className={`px-3 py-1 rounded-full ${tagClass}`}>
-                {tech}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {data.projects.length > 0 && (
-        <section>
-          <h3 className="text-2xl font-semibold mb-4">Projects</h3>
-          <div className="space-y-6">
-            {data.projects.map((project) => (
-              <div key={project.title}>
-                <h4 className="text-xl font-semibold text-blue-700">
-                  {project.title}
-                </h4>
-                <p className={textClass}>{project.description}</p>
-                <ul className="flex gap-2 mt-2 flex-wrap text-sm">
-                  {project.technologies.map((tech) => (
-                    <li
-                      key={tech}
-                      className={`px-2 py-1 rounded ${tagClass}`}
-                    >
-                      {tech}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
+      <PortfolioNavbar sections={data.sections} />
+      <div className="flex justify-end gap-2 mb-4">
+        {["desktop", "tablet", "mobile"].map((size) => (
+          <button
+            key={size}
+            onClick={() => setPreviewSize(size as typeof previewSize)}
+            className={`px-3 py-1 border rounded text-sm capitalize
+              ${previewSize === size ? "bg-blue-600 text-white" : "bg-white text-gray-700"}
+            `}
+          >
+            {size}
+          </button>
+        ))}
+      </div>
+      {Array.isArray(data.sections) && data.sections.length === 0 ? (
+        <p className="text-gray-500 italic">No sections yet. Use the editor to add some!</p>
+      ) : (
+        <div
+          className={`mx-auto transition-all duration-300 
+            ${previewSize === "desktop" ? "max-w-5xl" : ""}
+            ${previewSize === "tablet" ? "max-w-2xl scale-[97%]" : ""}
+            ${previewSize === "mobile" ? "max-w-sm scale-[90%]" : ""}
+          `}
+        >
+          {data.sections.map((section) => (
+            <section
+              key={section.anchor || section.label}
+              {...(section.anchor ? { id: section.anchor } : {})}
+              style={{
+                backgroundColor: section.bgColor || undefined,
+                color: section.textColor || undefined,
+                textAlign: section.textAlign || 'left',
+              }}
+              className={`
+                mb-12 p-4 rounded
+                ${section.stylePreset === "card" ? "bg-white shadow border" : ""}
+                ${section.stylePreset === "highlight" ? "bg-blue-600 text-white" : ""}
+              `}
+            >
+              <h2 className="text-xl font-bold mb-2">{section.label}</h2>
+              {section.blocks.map((block, i) => {
+                if (block.type === "text" || block.type === "textarea") {
+                  return <p key={i} className="mb-2 whitespace-pre-line">{block.content as ReactNode}</p>;
+                }
+                if (block.type === "tags") {
+                  return (
+                    <ul key={i} className="flex flex-wrap gap-2">
+                      {(block.content as string[]).map((tag, j) => (
+                        <li key={j} className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">
+                          {tag}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+                if (block.type === "multi-text") {
+                  return (
+                    <ul key={i} className="space-y-1">
+                      {(block.content as SectionField[]).map((field, j) => (
+                        <li key={j}><strong>{field.label}:</strong> {field.value}</li>
+                      ))}
+                    </ul>
+                  );
+                }
+                if (block.type === "quote") {
+                  return (
+                    <blockquote key={i} className="italic border-l-4 pl-4 border-blue-400 text-gray-700">
+                      {block.content as ReactNode}
+                    </blockquote>
+                  );
+                }
+                
+                if (block.type === "image") {
+                  return (
+                    <img
+                      key={i}
+                      src={block.content as string}
+                      alt=""
+                      className="max-w-full rounded shadow my-4"
+                    />
+                  );
+                }
+                
+                if (block.type === "link-list") {
+                  return (
+                    <ul key={i} className="list-disc pl-4 space-y-1">
+                      {(block.content as SectionField[]).map((link, j) => (
+                        <li key={j}>
+                          <a
+                            href={link.value}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+                return null;
+              })}
+            </section>
+          ))}
+        </div>
       )}
     </div>
   );

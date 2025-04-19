@@ -1,5 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+// import ThemeToggle from "./ThemeToggle";
 
 const Header = () => {
   const { user, login, logout } = useAuth();
@@ -23,6 +24,7 @@ const Header = () => {
             Dashboard
           </Link>
           <span className="text-sm text-gray-600">{user.displayName}</span>
+          {/* <ThemeToggle /> */}
           <button onClick={logout} className="text-sm text-red-600 hover:underline">
             Logout
           </button>

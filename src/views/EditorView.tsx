@@ -7,6 +7,8 @@ import { useSearchParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Portfolio } from "../types/Portfolio";
+import { useNotification } from "../context/NotificationContext";
+import { useLoading } from "../context/LoadingContext";
 
 
 const STORAGE_KEY = "portfolio-data";
@@ -17,23 +19,28 @@ function EditorView() {
   const [portfolio, setPortfolio] = useState<Portfolio>({
     name: "",
     title: "",
-    about: "",
-    technologies: [],
-    projects: [],
     template: "clean",
+    sections: [{
+      blocks: [], anchor: '', label: '',
+      textAlign: "left",
+      textColor: "",
+      bgColor: ""
+    }]
   });
-  const [loading, setLoading] = useState(false);
-  
+
+  const { notify } = useNotification();
+  const { showLoading, hideLoading } = useLoading();
+
   useEffect(() => {
     const loadPortfolio = async () => {
       if (!id) return;
-      setLoading(true);
+      showLoading();
       const ref = doc(db, "portfolios", id);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         setPortfolio(snap.data() as Portfolio);
       }
-      setLoading(false);
+      hideLoading();
     };
   
     loadPortfolio();
@@ -44,10 +51,14 @@ function EditorView() {
 
   const handlePublish = async () => {
     if (!user) return;
-  
+    showLoading();
     const newId = await publishPortfolio(portfolio, user, id ?? undefined);
     setPublicLink(`${window.location.origin}/p/${newId}`);
-    alert(id ? "Portfolio updated!" : "Portfolio published!");
+    hideLoading();
+    notify({
+      message: id ? "✅ Portfolio updated!" : "✅ Portfolio published!",
+      type: "success",
+    });
   };
 
   // Cargar desde localStorage al iniciar
@@ -63,18 +74,8 @@ function EditorView() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(portfolio));
   }, [portfolio]);
   
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-        <p className="ml-4 text-gray-600">Loading your portfolio...</p>
-      </div>
-    );
-  }
-  
   return (
     <div className="min-h-screen p-8 bg-gray-100">
-      <h1 className="text-2xl font-bold text-center mb-8">📋 Portfolio Builder</h1>
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-xl font-semibold mb-4">Edit</h2>
